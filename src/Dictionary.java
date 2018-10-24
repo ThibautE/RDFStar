@@ -10,20 +10,24 @@ public class Dictionary {
 	
 	public Dictionary() {
 		super();
-		map = new HashMap<Integer, String>();
+		this.map = new HashMap<Integer, String>();
 	}
 
 	public HashMap<Integer, String> getDictionary() {
-		return map;
+		return this.map;
 	}
 	
-	public Dictionary init(HashSet<String> words) {
+	public Dictionary initDico(HashSet<String> words) {
 		int n = 0;
 		List<String> list = new ArrayList<String>(words);
 		Collections.sort(list);
 		for (String word : list) {
 			n++;
-			this.getDictionary().put(n, word); 
+			try {
+				this.getDictionary().put(n, word);
+			}catch(Exception e) {
+				System.out.println(e);
+			}
 		}
 		return this;
 	}
