@@ -2,55 +2,48 @@ package rdf;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import rdf.Query;
-import rdf.Index;
-import rdf.Triplet;
+import java.util.TreeSet;
 
 public class Solver {
-	public static void solveQueries(ArrayList<Query> queries, Index index){
 
-        for (Query q : queries){
-            q.setResultQuery(solveQuery(q, index));
+
+    public static void solveQueries(ArrayList<Query> queries, Index index){
+
+        for (Query query : queries){
+            query.setResultQuery(solveQuery(query, index));
         }
 
     }
 
-    private static ArrayList<Integer> solveQuery(Query query, Index index) {
+    private static TreeSet<Integer> solveQuery(Query query, Index index) {
+    	HashMap<Integer, ArrayList<Integer>> hash = new HashMap<Integer, ArrayList<Integer>>();
+        ArrayList<Integer> array = new ArrayList<Integer>();
+        TreeSet<Integer> tree = new TreeSet<Integer>();
+        boolean booleanInsert = true;
 
-        boolean insert = true;
-        ArrayList<Integer> que = new ArrayList<Integer>();
-        
-        for (Triplet t : query.getTriplet()){
-            ArrayList<Integer> subMatches = solveTriplet(t, index);
-
-            if (insert){
-            	que.addAll(subMatches);
-            	insert = false;
-            }else if(que.isEmpty()){
+        for (Query.Triplet t : query.getTriplet()){
+        	//array = solveTriplet(t, index);
+        	hash = index.getPOS().get(t.getPredicateIndex());
+        	array = hash.get(t.getObjectIndex());
+        	
+        	if(array == null) {
+        		return new TreeSet<Integer>();
+        	}
+        	
+        	int select = array.size();
+        	t.setSelectivite(select);
+        	
+            if (booleanInsert){
+            	booleanInsert = false;
+                tree.addAll(array);
+            }else if(tree.isEmpty()){
                 break;
             } else  {
-            	que.retainAll(subMatches);
+                tree.retainAll(array);
             }
         }
+        return tree;
 
-        return que;
-
-    }
-
-    private static ArrayList<Integer> solveTriplet(Triplet triplet, Index index) {
-        HashMap<Integer, ArrayList<Integer>> os = index.getIndexPOS().get(triplet.getPredicateIndex());
-
-        ArrayList<Integer> s = os.get(triplet.getObjectIndex());
-
-        if (s == null){
-            return new ArrayList<Integer>();
-        }
-
-        int selectivity = s.size();
-        triplet.setSelect(selectivity);
-
-        return s;
     }
 
 }

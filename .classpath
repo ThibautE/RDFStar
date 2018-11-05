@@ -6,14 +6,14 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry exported="true" kind="lib" path="/home/thibaut/Téléchargements/Materiel pour le projet-20181010/libraries/commons-io-2.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="/home/thibaut/Téléchargements/Materiel pour le projet-20181010/libraries/sesame-model-2.7.11.jar"/>
-	<classpathentry exported="true" kind="lib" path="/home/thibaut/Téléchargements/Materiel pour le projet-20181010/libraries/sesame-queryalgebra-evaluation-2.7.11.jar"/>
-	<classpathentry exported="true" kind="lib" path="/home/thibaut/Téléchargements/Materiel pour le projet-20181010/libraries/sesame-rio-api-2.7.11.jar" sourcepath=""/>
-	<classpathentry exported="true" kind="lib" path="/home/thibaut/Téléchargements/Materiel pour le projet-20181010/libraries/sesame-rio-extensions-api-0.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="/home/thibaut/Téléchargements/Materiel pour le projet-20181010/libraries/sesame-rio-rdfxml-2.7.11.jar"/>
-	<classpathentry exported="true" kind="lib" path="/home/thibaut/Téléchargements/Materiel pour le projet-20181010/libraries/sesame-util-2.7.11.jar"/>
-	<classpathentry exported="true" kind="lib" path="/home/thibaut/Téléchargements/Materiel pour le projet-20181010/libraries/slf4j-api-1.6.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="/home/thibaut/Téléchargements/slf4j-api-1.6.1.jar"/>
+	<classpathentry kind="lib" path="lib/commons-io-2.4.jar"/>
+	<classpathentry kind="lib" path="lib/sesame-model-2.7.11.jar"/>
+	<classpathentry kind="lib" path="lib/sesame-queryalgebra-evaluation-2.7.11.jar"/>
+	<classpathentry kind="lib" path="lib/sesame-rio-api-2.7.11.jar"/>
+	<classpathentry kind="lib" path="lib/sesame-rio-extensions-api-0.1.jar"/>
+	<classpathentry kind="lib" path="lib/sesame-rio-rdfxml-2.7.11.jar"/>
+	<classpathentry kind="lib" path="lib/sesame-util-2.7.11.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-api-1.7.25.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-simple-1.7.25.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

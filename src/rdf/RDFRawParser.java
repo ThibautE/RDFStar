@@ -1,4 +1,5 @@
 package rdf;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -8,7 +9,6 @@ import java.io.Reader;
 import org.openrdf.model.Statement;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.Rio;
-import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.helpers.RDFHandlerBase;
 
 import rdf.Dictionary;
@@ -37,8 +37,9 @@ public final class RDFRawParser {
 			int sIndex = dictionary.initDico(st.getSubject().toString());
 			int pIndex = dictionary.initDico(st.getPredicate().toString());
 			int oIndex = dictionary.initDico(st.getObject().toString());
-			index.initIndex(sIndex, pIndex, oIndex);
-			System.out.println("\n" + st.getSubject() + "\t " + st.getPredicate() +"\t " + st.getObject());
+			index.addToIndex(sIndex, pIndex, oIndex);
+
+			//System.out.println("\n" + st.getSubject() + "\t " + st.getPredicate() +"\t " + st.getObject());
 		}
 	
 	}
@@ -63,6 +64,5 @@ public final class RDFRawParser {
 	public void print(String s) {
 		System.out.println(s);
 	}
-	
 
 }

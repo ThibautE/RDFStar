@@ -397,3 +397,4 @@ SELECT ?v0 WHERE {
 SELECT ?v0 WHERE {
 	?v0 <http://db.uwaterloo.ca/~galuc/wsdbm/likes> <http://db.uwaterloo.ca/~galuc/wsdbm/Product212> .
 }
+

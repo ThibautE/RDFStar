@@ -1,10 +1,13 @@
 package rdf;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class Dictionary {
 	
 	public HashMap<Integer, String> map;
 	public HashMap<String, Integer> mapR;
+    private static  int cptID = 0;
 	
 	public Dictionary() {
 		super();
@@ -12,26 +15,28 @@ public class Dictionary {
 		this.mapR = new HashMap<String, Integer>();
 	}
 
-	public HashMap<Integer, String> getDictionary() {
-		return this.map;
+	public Map<Integer, String> getDictionary() {
+		return map;
 	}
 	
-	public HashMap<String, Integer> getDictionaryReversed() {
+	public Map<String, Integer> getDictionaryReversed() {
 		return this.mapR;
 	}
 	
 	public int initDico(String str){
-		int n = 0;
-        if (!mapR.containsKey(str)){
-            n++;
-            this.map.put(n, str);
-            this.mapR.put(str, n);
-            return n;
+		if (!mapR.containsKey(str)){
+            cptID++;
+            try{
+                this.map.put(cptID,str);
+                this.mapR.put(str, cptID);
+
+            }catch(Exception e) {
+                e.printStackTrace();
+            }
+            return cptID;
         } else {
             return mapR.get(str);
         }
-
-
     }
 
 	public int getIntValue(String str) {

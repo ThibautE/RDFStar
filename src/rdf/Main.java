@@ -22,7 +22,6 @@ import rdf.Query;
 import rdf.Dictionary;
 import rdf.Index;
 import rdf.Solver;
-import rdf.Triplet;
 
 public class Main {
 	
@@ -37,7 +36,6 @@ public class Main {
 	-workload_time
 	 */
 
-    private static String HELP = "-help";
     private static String QUERY = "-queries";
     private static String DATA = "-data";
     private static String OUTPUT = "-output";
@@ -45,6 +43,7 @@ public class Main {
     private static String EXPORT_RESULTS = "-export_results";
     private static String EXPORT_STATS = "-export_stats";
 	private static String WORKLOAD_TIME = "-workload_time";
+    private static String HELP = "-help";
     
     private static String FILE_OUTPUT;
     private static String FILE_QUERY ;
@@ -52,55 +51,59 @@ public class Main {
 
 
     public static void main(String[] args) throws IOException {
+    	
+    	int indexQ = -1;
+    	int indexD = -1;
+    	int indexO = -1;
 
 		List<String> arguments = Collections.unmodifiableList(Arrays.asList(args));
-		//arguments.add(0, "-workload_time");
 		
-		int indexQuery = arguments.indexOf(QUERY);
-		FILE_QUERY = arguments.get(indexQuery+1);
+		indexQ = arguments.indexOf(QUERY);
+		indexD = arguments.indexOf(DATA);
+		indexO = arguments.indexOf(OUTPUT);
+
+		if(indexQ < 0 || indexD < 0 || indexO < 0) {
+			System.out.println("Erreur! le jeu de requête ou le jeu de données n'est pas renseigné");
+			instruction();
+		}
+		FILE_QUERY = arguments.get(indexQ+1);
 		//FILE_QUERY = "./src/query/query.queryset";
 		File fileQ = new File(FILE_QUERY);
-
-		int indexData = arguments.indexOf(DATA);
-		FILE_DATA =  arguments.get(indexData+1);
+		
+		FILE_DATA =  arguments.get(indexD+1);
 		//FILE_DATA = "./src/fichier/100K.rdfxml";
 		File fileD = new File(FILE_DATA);
+	
+		FILE_OUTPUT =  arguments.get(indexO+1);
+		//FILE_OUTPUT = "./src/output/";
+		File fileO = new File(FILE_OUTPUT);
 		
-		int indexOutput = arguments.indexOf(OUTPUT);
-		//if(indexOutput<0 || new File(arguments.get(indexOutput+1)).isDirectory()) {
-			FILE_OUTPUT =  arguments.get(indexOutput+1);
-			//FILE_OUTPUT = "./src/output/";
-			File fileO = new File(FILE_OUTPUT);
+		System.out.println("Jeu de données : " + fileD.getPath());
+        System.out.println("Jeu de requêtes : " + fileQ.getPath());
+        System.out.println("Fichier de sortie : " + fileO.getCanonicalPath());
+        System.out.println("----------------------------------------");
 
-		//}
-		
-		if(FILE_QUERY.isEmpty()) {
-			System.out.println("Erreur! aucune requête renseigné, ajoutez avec la commande -queries \"Chemin jusqu'au dossier ou fichier\"");
-		}
-		if(FILE_DATA.isEmpty()) {
-			System.out.println("Erreur! aucune requête renseigné, ajoutez avec la commande -data \"Chemin jusqu'au fichier\"");
-		}
-		if(FILE_OUTPUT.isEmpty()) {
-			System.out.println("Erreur! aucune requête renseigné, ajoutez avec la commande -output \"Chemin jusqu'au dossier ou fichier\"");
-		}
-
+		//timer général
         long start = System.currentTimeMillis();
 
+        //timer parser
         long start1 = System.currentTimeMillis();
-        ArrayList<Query> queries = parseQueries(FILE_QUERY);
+        ArrayList<Query> queries = parseFile(FILE_QUERY);
         long end1 = System.currentTimeMillis();
         long durationQuery = end1 - start1;
-
+        
+        //timer parser
         long start2 = System.currentTimeMillis();
         RDFRawParser.readFile(fileD);
         long end2 = System.currentTimeMillis();
         long durationParse = end2 - start2;
 
-        Dictionary dico = RDFRawParser.getDictionary();
+        Dictionary dictionary = RDFRawParser.getDictionary();
         Index index = RDFRawParser.getIndex();
 
-        Query.bind(queries, dico);
+        Query.bind(queries, dictionary);
 
+        //timer requête
         long start3 = System.currentTimeMillis();
         Solver.solveQueries(queries, index);
         long end3 = System.currentTimeMillis();
@@ -108,89 +111,126 @@ public class Main {
 
         long end = System.currentTimeMillis();
         long totalDuration = end - start;
-        
+                        
         System.out.println("----------------------------------------");
-
-        if(arguments.contains(EXPORT_STATS)){
-        	System.out.println("Exportation du fichier de stats");
-            exportStats(queries,dico);
-        }
         
-        if(arguments.contains(EXPORT_RESULTS)) {
-        	System.out.println("Exportation du fichier de resultat");
-            exportResults(queries, dico);
-        }
-        
+        //si "-workload_time"
         if (arguments.contains(WORKLOAD_TIME)){
             System.out.println("----------------------------------------");
-            System.out.println("Temps total pour l'execution du programme : " + totalDuration + "ms");
-            System.out.println("----------------------------------------");
+            System.out.println("Temps total pour l'execution du programme : " + totalDuration + "ms (~" + totalDuration/1000 + " seconde(s))");
         }
         
         System.out.println("----------------------------------------");
 
+      //si "-verbose"
         if(arguments.contains(VERBOSE)) {
-        	System.out.println("Input data file : " + fileD.getPath());
-            System.out.println("Input queries file : " + fileQ.getPath());
-            System.out.println("Output directory: " + fileO.getPath());
-            System.out.println("----------------------------------------");
             System.out.println("Différentes durée des tâches : ");
             System.out.println("Parser effectué en " + durationParse + " ms");
             System.out.println(queries.size() + " requête en " + durationQuery + "ms");
             System.out.println("Query effectué en " + durationSolve + "ms");
+            System.out.println("----------------------------------------");
+            System.out.println("Exportation du fichier des temps d'execution...");
+
+            exportTime(durationParse, durationQuery, durationSolve, totalDuration);
         }
+        
+        //si "-export_stats"
+        if(arguments.contains(EXPORT_STATS)){
+        	System.out.println("Exportation du fichier de stats...");
+            exportStats(queries,dictionary);
+        }
+        
+        //si "-export_results"
+        if(arguments.contains(EXPORT_RESULTS)) {
+        	System.out.println("Exportation du fichier de resultat...");
+            exportResults(queries, dictionary);
+        }
+        
+        if(arguments.contains(HELP)) {
+        	instruction();
+        }
+       
     }
     
-	private static ArrayList<Query> parseQueries(String fileString) throws IOException {
-        
-        File file = new File(fileString);
+    public static void instruction() {
+    	System.out.println("Voici les différentes commande possible avec le programme\n"
+    			+ "-queries \"/chemin/vers/requetes\" ----------- OBLIGATOIRE \n" + 
+    			"	-data \"/chemin/vers/donnees\" ------------ OBLIGATOIRE \n" + 
+    			"	-output \"/chemin/vers/dossier/sortie\" --- CONSEILLE \n" + 
+    			"	-export_results ------------------------- Pour avoir le fichier de resultat (emplacement -output)\n" + 
+    			"	-export_stats --------------------------- Pour avoir le fichier de statistique (emplacement -output)\n" + 
+    			"	-verbose -------------------------------- Pour avoir les temps d'execution\n" + 
+    			"	-workload_timet ------------------------- Pour avoir le temps total d'execution");
+    } 
+    
+    //lit le fichier de reqûete en paramètre (-queries)
+	private static ArrayList<Query> parseFile(String fileString) throws IOException {
+        File fileS = new File(fileString);
 
         ArrayList<Query> query = new ArrayList<Query>();
-        ArrayList<File> files = new ArrayList<File>();
+        ArrayList<File> file = new ArrayList<File>();
 
-        if (file.isDirectory()){
-            files.addAll(Arrays.asList(file.listFiles()));
+        if (fileS.isDirectory()){
+        	file.addAll(Arrays.asList(fileS.listFiles()));
         }else {
-            files.add(file);
+        	file.add(fileS);
         }
 
-
-        for (File f : files){
-            System.out.println("Lecture du fichier " + f.getCanonicalPath());
+        for (File f : file){
+            System.out.println("Lecture du fichier " + f.getPath());
             query.addAll(Query.parse(f));
         }
         return query;
     }
 
-
-    private static void exportStats(ArrayList<Query> queries, Dictionary dico) throws IOException {
-    	File fileO = new File(FILE_OUTPUT); 
-        FileWriter stats = new FileWriter(fileO.getPath() + "/" + "stats.csv");
-        stats.append("Nom;Correspondances;Selectivité(%)" + "\n");
+	private static void exportTime(long durationParse, long durationQuery, long durationSolve, long totalDuration) throws IOException {
+		File file = new File(FILE_OUTPUT);
+        FileWriter fileWriter = new FileWriter(file.getPath() + "/" + "time.csv");
+        fileWriter.append("Tâche; Temps (en ms)" + "\n");
+        fileWriter.append("Parser fichier").append(";").append(String.valueOf(durationParse)).append("\n");
+        fileWriter.append("Parser des requêtes").append(";").append(String.valueOf(durationQuery)).append("\n");
+        fileWriter.append("Résolution").append(";").append(String.valueOf(durationSolve)).append("\n");
+        fileWriter.append("Temps total d'execution").append(";").append(String.valueOf(totalDuration)).append("\n");
+        fileWriter.close();
+        System.out.println("Exportation des temps effectuée avec succès");
+    }
+	
+	private static void exportStats(ArrayList<Query> queries, Dictionary dictionary) throws IOException {
+		File file = new File(FILE_OUTPUT);
+        FileWriter fileWriter = new FileWriter(file.getPath() + "/" + "stats.csv");
+        float selecTotal = 0;
+        float selectSum = 0;
+        fileWriter.append("Sujet ;Nombre de relation ;Nombre de relation \"Selectivity\" (en %)" + "\n");
         for(Query q : queries){
-            for(Triplet triplet : q.getTriplet()){
-                stats.append(triplet.toString()).append(";");
-                stats.append(String.valueOf(triplet.getSelect()) + ";");
+            for(Query.Triplet triplet : q.getTriplet()){
+            	fileWriter.append(triplet.toString()).append(";");
+            	fileWriter.append(String.valueOf(triplet.getSelectivite()) + ";");
 
-                float selectivity = ((float) triplet.getSelect() / dico.getDictionary().size()) * 100 ;
-                stats.append(String.valueOf(selectivity) + "\n");
+                float selectivite = ((float) triplet.getSelectivite() / dictionary.getDictionary().size()) * 100 ;
+                selectSum += (float) triplet.getSelectivite();
+                selecTotal += selectivite;
+                fileWriter.append(String.valueOf(selectivite) + "\n");
             }
         }
-
-        stats.close();
+        fileWriter.append(";").append(String.valueOf(selectSum)).append(";").append(String.valueOf(selecTotal));
+        fileWriter.close();
+        System.out.println("Exportation des statistiques effectuée avec succès");
     }
 
-    private static void exportResults(ArrayList<Query> queries, Dictionary dico) throws IOException {
-    	File fileO = new File(FILE_OUTPUT); 
-        FileWriter result = new FileWriter(fileO.getPath() + "/" + "result.csv");
-        result.append("P;O;S" + "\n");
-        for(Query q : queries){
-            result.append(q.toString()).append(';');
-            for ( Integer resId : q.getResultQuery() ){
-                result.append( dico.getDictionary().get(resId) ).append(';');
+    private static void exportResults(ArrayList<Query> queries, Dictionary dictionary) throws IOException {
+		File file = new File(FILE_OUTPUT);
+        FileWriter fileWriter = new FileWriter(file.getPath() + "/" + "result.csv");
+        fileWriter.append("Requête ; Relation avec la requête" + "\n");
+        for(Query query : queries){
+        	fileWriter.append(query.toString()).append(';').append('\n');
+            for (Integer resId : query.getResultQuery()){
+            	fileWriter.append(";");
+            	fileWriter.append(dictionary.getDictionary().get(resId)).append(';').append('\n');
             }
-            result.append('\n');
+            fileWriter.append('\n');
         }
-        result.close();
+        fileWriter.close();
+        System.out.println("Exportation des résultats effectuée avec succès");
+
     }
 }
