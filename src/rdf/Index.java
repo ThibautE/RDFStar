@@ -1,3 +1,4 @@
+package rdf;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -41,9 +42,15 @@ public class Index {
 		getIndexPOS().get(o).get(p).add(s);
 	}
 	
-	public void addToIndex(int s, int p, int o){
+	public void initIndex(int s, int p, int o){
         addPOS(p, o, s);
         addOPS(o, p, s);
     }
+	
+	/*
+	public HashSet<Integer> getLastColumn(int f, int s){
+		if()
+	}
+	*/
 	
 }
