@@ -78,11 +78,11 @@ public class Query {
 	
 	public ArrayList<Triplet> triplet = new ArrayList<Triplet>();
 	public static Integer indexS, indexP, indexO;
-	public ArrayList<String> var = new ArrayList<String>();
-	public TreeSet<Integer> res = new TreeSet<Integer>();
+	public ArrayList<String> arrayVar = new ArrayList<String>();
+	public TreeSet<Integer> treeResult = new TreeSet<Integer>();
 
 	public Query(String v) {
-		var.addAll(Arrays.asList(v));
+		arrayVar.addAll(Arrays.asList(v));
 	}
 	
 	public void addTriplet(Triplet t) {
@@ -94,11 +94,11 @@ public class Query {
 	}
 
     public TreeSet<Integer> getResultQuery(){
-        return res;
+        return treeResult;
     }
     
     public void setResultQuery(TreeSet<Integer> res){
-        this.res = res;
+        treeResult = res;
     }
 
 	
@@ -174,12 +174,12 @@ public class Query {
 
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT ");
-        for (String selection : var){
-            sb.append(selection).append(' ');
+        for (String select : arrayVar){
+            sb.append(select).append(' ');
         }
         sb.append("WHERE {\n");
-        for (Triplet triplet : triplet){
-            sb.append(triplet.toString()).append('\n');
+        for (Triplet where : triplet){
+            sb.append(where.toString()).append('\n');
         }
         sb.append('}');
         return sb.toString();

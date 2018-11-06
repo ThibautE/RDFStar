@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeSet;
 
-public class Solver {
+public class QuerySolver {
 
 
     public static void solveQueries(ArrayList<Query> queries, Index index){
@@ -19,10 +19,9 @@ public class Solver {
     	HashMap<Integer, ArrayList<Integer>> hash = new HashMap<Integer, ArrayList<Integer>>();
         ArrayList<Integer> array = new ArrayList<Integer>();
         TreeSet<Integer> tree = new TreeSet<Integer>();
-        boolean booleanInsert = true;
+        boolean bool = true;
 
         for (Query.Triplet t : query.getTriplet()){
-        	//array = solveTriplet(t, index);
         	hash = index.getPOS().get(t.getPredicateIndex());
         	array = hash.get(t.getObjectIndex());
         	
@@ -33,8 +32,8 @@ public class Solver {
         	int select = array.size();
         	t.setSelectivite(select);
         	
-            if (booleanInsert){
-            	booleanInsert = false;
+            if (bool){
+            	bool = false;
                 tree.addAll(array);
             }else if(tree.isEmpty()){
                 break;

@@ -21,7 +21,7 @@ import rdf.RDFRawParser;
 import rdf.Query;
 import rdf.Dictionary;
 import rdf.Index;
-import rdf.Solver;
+import rdf.QuerySolver;
 
 public class Main {
 	
@@ -105,7 +105,7 @@ public class Main {
 
         //timer requête
         long start3 = System.currentTimeMillis();
-        Solver.solveQueries(queries, index);
+        QuerySolver.solveQueries(queries, index);
         long end3 = System.currentTimeMillis();
         long durationSolve = end3 - start3;
 
@@ -131,19 +131,19 @@ public class Main {
             System.out.println("----------------------------------------");
             System.out.println("Exportation du fichier des temps d'execution...");
 
-            exportTime(durationParse, durationQuery, durationSolve, totalDuration);
+            ExportCSV.exportTime(FILE_OUTPUT, durationParse, durationQuery, durationSolve, totalDuration);
         }
         
         //si "-export_stats"
         if(arguments.contains(EXPORT_STATS)){
         	System.out.println("Exportation du fichier de stats...");
-            exportStats(queries,dictionary);
+            ExportCSV.exportStats(FILE_OUTPUT, queries,dictionary);
         }
         
         //si "-export_results"
         if(arguments.contains(EXPORT_RESULTS)) {
         	System.out.println("Exportation du fichier de resultat...");
-            exportResults(queries, dictionary);
+        	ExportCSV.exportResults(FILE_OUTPUT, queries, dictionary);
         }
         
         if(arguments.contains(HELP)) {
@@ -183,54 +183,5 @@ public class Main {
         return query;
     }
 
-	private static void exportTime(long durationParse, long durationQuery, long durationSolve, long totalDuration) throws IOException {
-		File file = new File(FILE_OUTPUT);
-        FileWriter fileWriter = new FileWriter(file.getPath() + "/" + "time.csv");
-        fileWriter.append("Tâche; Temps (en ms)" + "\n");
-        fileWriter.append("Parser fichier").append(";").append(String.valueOf(durationParse)).append("\n");
-        fileWriter.append("Parser des requêtes").append(";").append(String.valueOf(durationQuery)).append("\n");
-        fileWriter.append("Résolution").append(";").append(String.valueOf(durationSolve)).append("\n");
-        fileWriter.append("Temps total d'execution").append(";").append(String.valueOf(totalDuration)).append("\n");
-        fileWriter.close();
-        System.out.println("Exportation des temps effectuée avec succès");
-    }
 	
-	private static void exportStats(ArrayList<Query> queries, Dictionary dictionary) throws IOException {
-		File file = new File(FILE_OUTPUT);
-        FileWriter fileWriter = new FileWriter(file.getPath() + "/" + "stats.csv");
-        float selecTotal = 0;
-        float selectSum = 0;
-        fileWriter.append("Sujet ;Nombre de relation ;Nombre de relation \"Selectivity\" (en %)" + "\n");
-        for(Query q : queries){
-            for(Query.Triplet triplet : q.getTriplet()){
-            	fileWriter.append(triplet.toString()).append(";");
-            	fileWriter.append(String.valueOf(triplet.getSelectivite()) + ";");
-
-                float selectivite = ((float) triplet.getSelectivite() / dictionary.getDictionary().size()) * 100 ;
-                selectSum += (float) triplet.getSelectivite();
-                selecTotal += selectivite;
-                fileWriter.append(String.valueOf(selectivite) + "\n");
-            }
-        }
-        fileWriter.append(";").append(String.valueOf(selectSum)).append(";").append(String.valueOf(selecTotal));
-        fileWriter.close();
-        System.out.println("Exportation des statistiques effectuée avec succès");
-    }
-
-    private static void exportResults(ArrayList<Query> queries, Dictionary dictionary) throws IOException {
-		File file = new File(FILE_OUTPUT);
-        FileWriter fileWriter = new FileWriter(file.getPath() + "/" + "result.csv");
-        fileWriter.append("Requête ; Relation avec la requête" + "\n");
-        for(Query query : queries){
-        	fileWriter.append(query.toString()).append(';').append('\n');
-            for (Integer resId : query.getResultQuery()){
-            	fileWriter.append(";");
-            	fileWriter.append(dictionary.getDictionary().get(resId)).append(';').append('\n');
-            }
-            fileWriter.append('\n');
-        }
-        fileWriter.close();
-        System.out.println("Exportation des résultats effectuée avec succès");
-
-    }
 }
