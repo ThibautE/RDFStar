@@ -14,54 +14,32 @@ public class Index {
         this.pos = new HashMap<>();
     }
 
-    public void addToIndex(int sId, int pId, int oId){
-        addToPOS(sId, pId, oId);
-        addToOPS(sId, pId, oId);
+    public void addToIndex(int sub, int pred, int obj){
+        addPOS(pred, obj, sub);
     }
 
-    private void addToPOS(int sId, int pId, int oId){
-
+    void addPOS(int pred, int obj, int sub){
     	ArrayList<Integer> s = new ArrayList<>();
-        HashMap<Integer, ArrayList<Integer>> os = new HashMap<>();
+        HashMap<Integer, ArrayList<Integer>> po = new HashMap<>();
 
-        // Si P existe, recupérer os et s déjà existant.
-        if(this.pos.containsKey(pId)){
-            os = pos.get(pId);
+        if(this.pos.containsKey(pred)){
+            po = pos.get(pred);
 
-            if(os.containsKey(oId)){
-                s = os.get(oId);
+            if(po.containsKey(obj)){
+                s = po.get(obj);
             }
         }
 
-        s.add(sId);
-        os.put(oId, s);
-        this.pos.put(pId,os);
+        s.add(sub);
+        po.put(obj, s);
+        this.pos.put(pred,po);
     }
-
-
-    private void addToOPS(int sId, int pId, int oId){
-
-        ArrayList<Integer> s;
-
-        ops.computeIfAbsent(oId, k -> new HashMap<>());
-        HashMap<Integer, ArrayList<Integer>> o = ops.get(oId);
-
-        o.computeIfAbsent(pId, k -> new ArrayList<>());
-        s = o.get(pId);
-        HashMap<Integer, ArrayList<Integer>> ps = ops.get(oId);
-
-        // Si P existe, récupérer ps et s déjà existant
-        if(this.ops.containsKey(oId)){
-            ps = ops.get(oId);
-            if(ps.containsKey(pId)){
-                s = ps.get(pId);
-            }
-        }
-
-        s.add(sId);
-        ps.put(pId, s);
-        this.ops.put(oId,ps);
-    }
+    
+	/*
+	public HashSet<Integer> getLastColumn(int f, int s){
+		if()
+	}
+	*/
 
     public HashMap<Integer, HashMap<Integer, ArrayList<Integer>>> getOPS() {
         return ops;
@@ -70,10 +48,5 @@ public class Index {
     public HashMap<Integer, HashMap<Integer, ArrayList<Integer>>> getPOS() {
         return pos;
     }
-	/*
-	public HashSet<Integer> getLastColumn(int f, int s){
-		if()
-	}
-	*/
 	
 }

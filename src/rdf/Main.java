@@ -9,12 +9,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.io.FilenameFilter;
 
 import org.openrdf.model.Statement;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.Rio;
 import org.openrdf.rio.*;
-import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.helpers.RDFHandlerBase;
 
 import rdf.RDFRawParser;
@@ -50,11 +48,14 @@ public class Main {
     private static String FILE_DATA;
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, RDFHandlerException {
     	
     	int indexQ = -1;
     	int indexD = -1;
     	int indexO = -1;
+    	
+    	ArrayList<File> fileQuery = new ArrayList<>();
+    	ArrayList<File> fileData = new ArrayList<>();
 
 		List<String> arguments = Collections.unmodifiableList(Arrays.asList(args));
 		
@@ -76,7 +77,11 @@ public class Main {
 	
 		FILE_OUTPUT =  arguments.get(indexO+1);
 		//FILE_OUTPUT = "./src/output/";
+		
 		File fileO = new File(FILE_OUTPUT);
+		if(!fileO.exists()) {
+			fileO.mkdir();
+		}
 		
 		System.out.println("Jeu de données : " + fileD.getPath());
         System.out.println("Jeu de requêtes : " + fileQ.getPath());
@@ -86,26 +91,67 @@ public class Main {
 		//timer général
         long start = System.currentTimeMillis();
 
-        //timer parser
+        //timer query parser ----------------------------------------------------------------------
+        
+        ArrayList<Query> queries = new ArrayList<Query>(); 
+        ArrayList<Query> totalQueries = new ArrayList<Query>(); 
         long start1 = System.currentTimeMillis();
-        ArrayList<Query> queries = parseFile(FILE_QUERY);
+        if(fileQ.isDirectory()) {
+			FilenameFilter filename = new FilenameFilter() {
+
+				@Override
+				public boolean accept(File arg0, String arg1) {
+					return arg1.endsWith("queryset");
+				}
+			};
+			
+			ArrayList<File> files = new ArrayList<File>(Arrays.asList(fileQ.listFiles(filename)));
+			fileData = files;
+			for(File f : files) {
+				queries = parseFile(f.getPath());
+				totalQueries.addAll(queries);
+			}
+		}else {
+			totalQueries = parseFile(FILE_QUERY);
+		}
+        
+        //-------------------------------------------------------------------------------------------
+        
         long end1 = System.currentTimeMillis();
         long durationQuery = end1 - start1;
         
-        //timer parser
+        //timer data parser --------------------------------------------------------------------------
         long start2 = System.currentTimeMillis();
-        RDFRawParser.readFile(fileD);
+        if(fileD.isDirectory()) {
+			FilenameFilter filename = new FilenameFilter() {
+
+				@Override
+				public boolean accept(File arg0, String arg1) {
+					return arg1.endsWith("rdfxml");
+				}
+			};
+			
+			ArrayList<File> files = new ArrayList<File>(Arrays.asList(fileD.listFiles(filename)));
+			fileQuery = files;
+			for(File f : files) {
+				RDFRawParser.readFile(f);
+			}
+		}else {
+	        RDFRawParser.readFile(fileD);
+		}
+        //---------------------------------------------------------------------------------------------
+        
         long end2 = System.currentTimeMillis();
         long durationParse = end2 - start2;
 
         Dictionary dictionary = RDFRawParser.getDictionary();
         Index index = RDFRawParser.getIndex();
 
-        Query.bind(queries, dictionary);
+        Query.bind(totalQueries, dictionary);
 
         //timer requête
         long start3 = System.currentTimeMillis();
-        QuerySolver.solveQueries(queries, index);
+        QuerySolver.solveQueries(totalQueries, index);
         long end3 = System.currentTimeMillis();
         long durationSolve = end3 - start3;
 
@@ -125,9 +171,9 @@ public class Main {
       //si "-verbose"
         if(arguments.contains(VERBOSE)) {
             System.out.println("Différentes durée des tâches : ");
-            System.out.println("Parser effectué en " + durationParse + " ms");
-            System.out.println(queries.size() + " requête en " + durationQuery + "ms");
-            System.out.println("Query effectué en " + durationSolve + "ms");
+            System.out.println("Reccupération du jeu de données en " + durationParse + " ms");
+            System.out.println("Réccupération des " + totalQueries.size() + " requêtes en " + durationQuery + "ms");
+            System.out.println("Solver de requête effectué en " + durationSolve + "ms");
             System.out.println("----------------------------------------");
             System.out.println("Exportation du fichier des temps d'execution...");
 
@@ -137,13 +183,13 @@ public class Main {
         //si "-export_stats"
         if(arguments.contains(EXPORT_STATS)){
         	System.out.println("Exportation du fichier de stats...");
-            ExportCSV.exportStats(FILE_OUTPUT, queries,dictionary);
+            ExportCSV.exportStats(FILE_OUTPUT, totalQueries, dictionary);
         }
         
         //si "-export_results"
         if(arguments.contains(EXPORT_RESULTS)) {
         	System.out.println("Exportation du fichier de resultat...");
-        	ExportCSV.exportResults(FILE_OUTPUT, queries, dictionary);
+        	ExportCSV.exportResults(FILE_OUTPUT, totalQueries, dictionary);
         }
         
         if(arguments.contains(HELP)) {
@@ -159,28 +205,28 @@ public class Main {
     			"	-output \"/chemin/vers/dossier/sortie\" --- CONSEILLE \n" + 
     			"	-export_results ------------------------- Pour avoir le fichier de resultat (emplacement -output)\n" + 
     			"	-export_stats --------------------------- Pour avoir le fichier de statistique (emplacement -output)\n" + 
-    			"	-verbose -------------------------------- Pour avoir les temps d'execution\n" + 
+    			"	-verbose -------------------------------- Pour avoir les temps d'execution et un fichier de durée d'execution\n" + 
     			"	-workload_timet ------------------------- Pour avoir le temps total d'execution");
     } 
     
     //lit le fichier de reqûete en paramètre (-queries)
 	private static ArrayList<Query> parseFile(String fileString) throws IOException {
         File fileS = new File(fileString);
-
-        ArrayList<Query> query = new ArrayList<Query>();
-        ArrayList<File> file = new ArrayList<File>();
+        
+        ArrayList<Query> queryParser = new ArrayList<Query>();
+        ArrayList<File> fileQueryParser = new ArrayList<File>();
 
         if (fileS.isDirectory()){
-        	file.addAll(Arrays.asList(fileS.listFiles()));
+        	fileQueryParser.addAll(Arrays.asList(fileS.listFiles()));
         }else {
-        	file.add(fileS);
+        	fileQueryParser.add(fileS);
         }
 
-        for (File f : file){
+        for (File f : fileQueryParser){
             System.out.println("Lecture du fichier " + f.getPath());
-            query.addAll(Query.parse(f));
+            queryParser.addAll(Query.parse(f));
         }
-        return query;
+        return queryParser;
     }
 
 	

@@ -8,11 +8,9 @@ public class QuerySolver {
 
 
     public static void solveQueries(ArrayList<Query> queries, Index index){
-
         for (Query query : queries){
             query.setResultQuery(solveQuery(query, index));
         }
-
     }
 
     private static TreeSet<Integer> solveQuery(Query query, Index index) {

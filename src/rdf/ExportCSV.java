@@ -48,8 +48,7 @@ public class ExportCSV {
         for(Query query : queries){
         	fileWriter.append(query.toString()).append(';').append('\n');
             for (Integer relation : query.getResultQuery()){
-            	fileWriter.append(";");
-            	fileWriter.append(dictionary.getDictionary().get(relation)).append(';').append('\n');
+               	fileWriter.append(";").append(dictionary.getDictionary().get(relation)).append('\n');
             }
             fileWriter.append('\n');
         }

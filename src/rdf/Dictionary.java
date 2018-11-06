@@ -7,7 +7,7 @@ public class Dictionary {
 	
 	public HashMap<Integer, String> map;
 	public HashMap<String, Integer> mapR;
-    private static  int cptID = 0;
+    private static int i = 0;
 	
 	public Dictionary() {
 		super();
@@ -15,25 +15,20 @@ public class Dictionary {
 		this.mapR = new HashMap<String, Integer>();
 	}
 
-	public Map<Integer, String> getDictionary() {
+	public HashMap<Integer, String> getDictionary() {
 		return map;
 	}
 	
-	public Map<String, Integer> getDictionaryReversed() {
+	public HashMap<String, Integer> getDictionaryReversed() {
 		return this.mapR;
 	}
 	
 	public int initDico(String str){
 		if (!mapR.containsKey(str)){
-            cptID++;
-            try{
-                this.map.put(cptID,str);
-                this.mapR.put(str, cptID);
-
-            }catch(Exception e) {
-                e.printStackTrace();
-            }
-            return cptID;
+            i++;
+            this.map.put(i,str);
+            this.mapR.put(str, i);
+            return i;
         } else {
             return mapR.get(str);
         }

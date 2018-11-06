@@ -45,7 +45,8 @@ public final class RDFRawParser {
 	}
 	
 	public static void readFile(File file) throws FileNotFoundException {
-
+		
+		System.out.println("Lecture du jeu de données " + file.getPath());
 		Reader reader = new FileReader(file);
 
         org.openrdf.rio.RDFParser rdfParser = Rio.createParser(RDFFormat.RDFXML);
@@ -54,15 +55,11 @@ public final class RDFRawParser {
             rdfParser.parse(reader, "");
         } catch (Exception e) {
         }
-
         try {
             reader.close();
         } catch (IOException e) {
         }
 	}
-	
-	public void print(String s) {
-		System.out.println(s);
-	}
+
 
 }

@@ -31,7 +31,6 @@ public class Query {
 	        o = object;
 	    }
 
-
 	    String getPredicate(){
 	        return p;
 	    }
@@ -100,78 +99,68 @@ public class Query {
     public void setResultQuery(TreeSet<Integer> res){
         treeResult = res;
     }
-
 	
 	public static void bind(ArrayList<Query> query, Dictionary dictionary) {
-		Map<String, Integer> dicoReverse = dictionary.getDictionaryReversed();
-        Integer sId, oId, pId;
-
-
+		HashMap<String, Integer> mapR = dictionary.getDictionaryReversed();
+        Integer obj, pred;
+        String error = "";
         for (Query q : query){
             for (Triplet t : q.triplet){
+                pred = mapR.get(t.getPredicate());
+                obj = mapR.get(t.getObject());
 
-                pId = dicoReverse.get(t.getPredicate());
-                oId = dicoReverse.get(t.getObject());
-
-                if (pId == null || oId == null){
-                    String errMessage = "aucune solution trouvée : ";
-                    if (pId == null) errMessage += "aucun Predicate ne correspond";
-                    if (oId == null) errMessage += "aucun Object ne correspond";
-                    throw new NullPointerException(errMessage);
+                if (pred == null || obj == null){
+                    error = "aucune solution trouvée : ";
+                    if (pred == null) error += "aucun Predicate ne correspond";
+                    if (obj == null) error += "aucun Object ne correspond";
+                    System.out.println(error);
                 } else {
-                    t.bind(pId, oId);
+                    t.bind(pred, obj);
                 }
-
             }
-
         }
 	}
-
-	private static String readFile(File inputFile) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Stream<String> stream =
-                Files.lines( Paths.get(inputFile.toURI()), StandardCharsets.UTF_8);
-        stream.forEach(s -> sb.append(s).append("\n"));
-        return sb.toString();
-    }
 	
-	public static ArrayList<Query> parse(File inputFile) throws IOException {
+	public static ArrayList<Query> parse(File file) throws IOException {
+		String sub, pred, obj;
         ArrayList<Query> queries = new ArrayList<>();
+        
+        //lecture du fichier
+        StringBuilder sb = new StringBuilder();
+        Stream<String> stream = Files.lines(Paths.get(file.toURI()), StandardCharsets.UTF_8);
+        stream.forEach(s -> sb.append(s).append("\n"));
+       
+        String fileString = sb.toString();
+        stream.close();
+        
+        Pattern pattern = Pattern.compile("SELECT (\\S+) WHERE \\{((?:\\n\\s\\1 \\S+ \\S+ \\.)*)? ?\\n?}");
+        //triplet spo
+        Pattern pat = Pattern.compile("\\s(\\S+) <(\\S+)> <(\\S+)> \\.");
 
-        String source = readFile(inputFile);
+        //on applique notre patern au fichier
+        Matcher matcher = pattern.matcher(fileString);
+        Matcher match;
 
-        Pattern fullQueryPattern = Pattern.compile("SELECT (\\S+) WHERE \\{((?:\\n\\s\\1 \\S+ \\S+ \\.)+)? ?\\n?}");
+        String res; 
 
-        Matcher fullQueryMatcher = fullQueryPattern.matcher(source);
-
-        Pattern subQueryPattern = Pattern.compile("\\s(\\S+) <(\\S+)> <(\\S+)> \\.");
-        Matcher subQueryMatcher;
-
-        String subQueries, s, p, o;
-
-        while (fullQueryMatcher.find()){
-            s = fullQueryMatcher.group(1);
-            subQueries = fullQueryMatcher.group(2); 
-            subQueryMatcher = subQueryPattern.matcher(subQueries);
-            Query query = new Query(s);
-
-            while (subQueryMatcher.find()){
-                s = subQueryMatcher.group(1);
-                p = subQueryMatcher.group(2);
-                o = subQueryMatcher.group(3);
-
-                Triplet triplet = new Query.Triplet(s, p, o);
+        while (matcher.find()){
+            sub = matcher.group(1);
+            res = matcher.group(2); 
+            match = pat.matcher(res);
+            Query query = new Query(sub);
+            while (match.find()){
+                sub = match.group(1);
+                pred = match.group(2);
+                obj = match.group(3);
+                Triplet triplet = new Query.Triplet(sub, pred, obj);
                 query.addTriplet(triplet);
             }
-
             queries.add(query);
         }
-
         return queries;
     }
 	
 	public String toString(){
-
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT ");
         for (String select : arrayVar){
