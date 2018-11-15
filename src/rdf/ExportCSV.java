@@ -7,14 +7,15 @@ import java.util.ArrayList;
 
 public class ExportCSV {
 
-	static void exportTime(String fileString, long durationParse, long durationQuery, long durationSolve, long totalDuration) throws IOException {
+	static void exportTime(String fileString, long[] durationSolve) throws IOException {
+		int cpt = 0;
 		File file = new File(fileString);
         FileWriter fileWriter = new FileWriter(file.getPath() + "/" + "time.csv");
         fileWriter.append("Tâche; Temps (en ms)" + "\n");
-        fileWriter.append("Parser fichier").append(";").append(String.valueOf(durationParse)).append("\n");
-        fileWriter.append("Parser des requêtes").append(";").append(String.valueOf(durationQuery)).append("\n");
-        fileWriter.append("Résolution").append(";").append(String.valueOf(durationSolve)).append("\n");
-        fileWriter.append("Temps total d'execution").append(";").append(String.valueOf(totalDuration)).append("\n");
+        for(long d : durationSolve) {
+        	cpt++;
+        fileWriter.append("Résolution " +cpt).append(";").append(String.valueOf(durationSolve)).append("\n");
+        }
         fileWriter.close();
         System.out.println("Exportation des temps effectuée avec succès");
     }
@@ -54,7 +55,6 @@ public class ExportCSV {
         }
         fileWriter.close();
         System.out.println("Exportation des résultats effectuée avec succès");
-
     }
 	
 }

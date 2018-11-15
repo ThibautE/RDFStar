@@ -6,11 +6,9 @@ import java.util.TreeSet;
 
 public class Index {
 	
-	private HashMap<Integer, HashMap<Integer, ArrayList<Integer>>> ops;
-    private HashMap<Integer, HashMap<Integer, ArrayList<Integer>>> pos;
+	private HashMap<Integer, HashMap<Integer, ArrayList<Integer>>> pos;
 
     public Index(){
-        this.ops = new HashMap<>();
         this.pos = new HashMap<>();
     }
 
@@ -40,10 +38,6 @@ public class Index {
 		if()
 	}
 	*/
-
-    public HashMap<Integer, HashMap<Integer, ArrayList<Integer>>> getOPS() {
-        return ops;
-    }
 
     public HashMap<Integer, HashMap<Integer, ArrayList<Integer>>> getPOS() {
         return pos;

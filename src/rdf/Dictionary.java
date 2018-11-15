@@ -23,6 +23,7 @@ public class Dictionary {
 		return this.mapR;
 	}
 	
+	//Ajout au dictionnaire 
 	public int initDico(String str){
 		if (!mapR.containsKey(str)){
             i++;

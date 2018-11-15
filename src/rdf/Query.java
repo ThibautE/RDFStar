@@ -24,7 +24,7 @@ public class Query {
 	    private String s, p, o;
 	    private Integer indexS, indexP, indexO;
 	    private int select;
-
+	    
 	    Triplet(String subject, String property, String object){
 	        s = subject;
 	        p = property;
@@ -69,7 +69,7 @@ public class Query {
 	    }
 
 	    public String toString(){
-	            return s + " " + p + " " + o;
+	            return s + " <" + p + "> <" + o + ">";
 	    }
 	}
 	
@@ -77,10 +77,11 @@ public class Query {
 	
 	public ArrayList<Triplet> triplet = new ArrayList<Triplet>();
 	public static Integer indexS, indexP, indexO;
+    private boolean bool = false;
 	public ArrayList<String> arrayVar = new ArrayList<String>();
 	public TreeSet<Integer> treeResult = new TreeSet<Integer>();
 
-	public Query(String v) {
+	public Query(String... v) {
 		arrayVar.addAll(Arrays.asList(v));
 	}
 	
@@ -110,10 +111,10 @@ public class Query {
                 obj = mapR.get(t.getObject());
 
                 if (pred == null || obj == null){
-                    error = "aucune solution trouvée : ";
                     if (pred == null) error += "aucun Predicate ne correspond";
                     if (obj == null) error += "aucun Object ne correspond";
                     System.out.println(error);
+                    break;
                 } else {
                     t.bind(pred, obj);
                 }
