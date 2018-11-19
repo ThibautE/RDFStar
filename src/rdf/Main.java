@@ -88,6 +88,31 @@ public class Main {
         ArrayList<Query> queries = new ArrayList<Query>(); 
         ArrayList<Query> totalQueries = new ArrayList<Query>();
         //Si le fichier de query est un dossier chercher tous les fichiers finissant par .queryset
+        long start = System.currentTimeMillis();
+
+        if(fileD.isDirectory()) {
+			FilenameFilter filename = new FilenameFilter() {
+
+				@Override
+				public boolean accept(File arg0, String arg1) {
+					return arg1.endsWith("rdfxml");
+				}
+			};
+			
+			ArrayList<File> files = new ArrayList<File>(Arrays.asList(fileD.listFiles(filename)));
+		for(File f : files) {
+				RDFRawParser.readFile(f);
+			}
+		}else {
+	        RDFRawParser.readFile(fileD);
+		}
+
+        //Reccuperation du dictionnaire et de l'index
+        Dictionary dictionary = RDFRawParser.getDictionary();
+        Index index = RDFRawParser.getIndex();
+        
+        long reqstart = System.currentTimeMillis();
+        //parser des requêtes
         if(fileQ.isDirectory()) {
 			FilenameFilter filename = new FilenameFilter() {
 
@@ -100,34 +125,13 @@ public class Main {
 			ArrayList<File> files = new ArrayList<File>(Arrays.asList(fileQ.listFiles(filename)));
 			//pour le nombre de fichier trouvé on effectue parseFile
 			for(File f : files) {
-				queries = parseFile(f.getPath());
+				queries = QueriesParser.parseFile(f.getPath());
 				totalQueries.addAll(queries);
 			}
 			//sinon si c'est un fichier on effectue parseFile seulement sur celui-ci
 		}else {
-			totalQueries = parseFile(FILE_QUERY);
+			totalQueries = QueriesParser.parseFile(FILE_QUERY);
 		}
-
-        if(fileD.isDirectory()) {
-			FilenameFilter filename = new FilenameFilter() {
-
-				@Override
-				public boolean accept(File arg0, String arg1) {
-					return arg1.endsWith("rdfxml");
-				}
-			};
-			
-			ArrayList<File> files = new ArrayList<File>(Arrays.asList(fileD.listFiles(filename)));
-			for(File f : files) {
-				RDFRawParser.readFile(f);
-			}
-		}else {
-	        RDFRawParser.readFile(fileD);
-		}
-
-        //Reccuperation du dictionnaire et de l'index
-        Dictionary dictionary = RDFRawParser.getDictionary();
-        Index index = RDFRawParser.getIndex();
         
         //bind des queries pour predicate et object 
         Query.bind(totalQueries, dictionary);
@@ -140,6 +144,12 @@ public class Main {
 	        durationSolve[i] = end3 - start3;
             System.out.println("Temps total pour la résolution des requêtes : " + durationSolve[i] + "ms (pour " + totalQueries.size() + " requêtes)");
         }
+        long end = System.currentTimeMillis();
+        long reqend = System.currentTimeMillis();
+        long totalRequete = reqend - reqstart;
+        long total = end - start;
+        System.out.println("Durée total de l'éxecution : " + total + "ms");
+        System.out.println("Durée total de l'éxecution des requêtes (parse + exec) : " + totalRequete + "ms");
         ExportCSV.exportTime(FILE_OUTPUT, durationSolve);
 
                         
@@ -180,26 +190,5 @@ public class Main {
     			"	-verbose -------------------------------- Pour avoir les temps d'execution et un fichier de durée d'execution\n" + 
     			"	-workload_timer ------------------------- Pour avoir le temps total d'execution");
     } 
-    
-    //lit le fichier de reqûete en paramètre (-queries)
-	private static ArrayList<Query> parseFile(String fileString) throws IOException {
-        File file = new File(fileString);
-        
-        ArrayList<Query> queryParser = new ArrayList<Query>();
-        ArrayList<File> fileQueryParser = new ArrayList<File>();
-
-        if (file.isDirectory()){
-        	fileQueryParser.addAll(Arrays.asList(file.listFiles()));
-        }else {
-        	fileQueryParser.add(file);
-        }
-
-        for (File f : fileQueryParser){
-            System.out.println("Accès au fichier " + f.getPath());
-            queryParser.addAll(Query.parse(f));
-        }
-        return queryParser;
-    }
-
 	
 }

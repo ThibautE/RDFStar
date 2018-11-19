@@ -22,6 +22,10 @@ public class QuerySolver {
         boolean bool = true;      
        
         for (Query.Triplet t : query.getTriplet()){
+        	
+        	if (query.checking()){
+                return tree;
+            }
         	        	
         	hash = index.getPOS().get(t.getPredicateIndex());
         	array = hash.get(t.getObjectIndex());

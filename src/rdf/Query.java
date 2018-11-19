@@ -72,12 +72,10 @@ public class Query {
 	            return s + " <" + p + "> <" + o + ">";
 	    }
 	}
-	
-	File fileQuery;
-	
+		
 	public ArrayList<Triplet> triplet = new ArrayList<Triplet>();
 	public static Integer indexS, indexP, indexO;
-    private boolean bool = false;
+    private boolean check = false;
 	public ArrayList<String> arrayVar = new ArrayList<String>();
 	public TreeSet<Integer> treeResult = new TreeSet<Integer>();
 
@@ -100,20 +98,28 @@ public class Query {
     public void setResultQuery(TreeSet<Integer> res){
         treeResult = res;
     }
+    
+    boolean checking() {
+        return check;
+    }
+    
+    private void checked() {
+        check = true;
+    }
+    
+    private void unchecked() {
+    	check = false;
+    }
 	
 	public static void bind(ArrayList<Query> query, Dictionary dictionary) {
 		HashMap<String, Integer> mapR = dictionary.getDictionaryReversed();
         Integer obj, pred;
-        String error = "";
         for (Query q : query){
             for (Triplet t : q.triplet){
                 pred = mapR.get(t.getPredicate());
                 obj = mapR.get(t.getObject());
-
                 if (pred == null || obj == null){
-                    if (pred == null) error += "aucun Predicate ne correspond";
-                    if (obj == null) error += "aucun Object ne correspond";
-                    System.out.println(error);
+                    q.checked();
                     break;
                 } else {
                     t.bind(pred, obj);
@@ -134,7 +140,7 @@ public class Query {
         String fileString = sb.toString();
         stream.close();
         
-        Pattern pattern = Pattern.compile("SELECT (\\S+) WHERE \\{((?:\\n\\s\\1 \\S+ \\S+ \\.)*)? ?\\n?}");
+        Pattern pattern = Pattern.compile("SELECT (\\S+) WHERE \\{((?:\\n\\t?\\s\\1 \\S+ \\S+ ?> ?\\.?)+)? ?\\.?\\n*}");
         //triplet spo
         Pattern pat = Pattern.compile("\\s(\\S+) <(\\S+)> <(\\S+)> \\.");
 

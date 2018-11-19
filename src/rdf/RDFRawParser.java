@@ -27,7 +27,7 @@ public final class RDFRawParser {
         return index;
     }
 
-	private static class RDFListener extends RDFHandlerBase {
+	static class RDFListener extends RDFHandlerBase {
 
 		//ArrayList<String> words;
 		
