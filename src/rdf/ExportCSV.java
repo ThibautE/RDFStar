@@ -14,7 +14,7 @@ public class ExportCSV {
         fileWriter.append("Tâche; Temps (en ms)" + "\n");
         for(long d : durationSolve) {
         	cpt++;
-        fileWriter.append("Résolution " +cpt).append(";").append(String.valueOf(durationSolve)).append("\n");
+        fileWriter.append("Résolution " +cpt).append(";").append(String.valueOf(d)).append("\n");
         }
         fileWriter.close();
         System.out.println("Exportation des temps effectuée avec succès");

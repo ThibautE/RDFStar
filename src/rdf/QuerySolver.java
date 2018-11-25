@@ -26,7 +26,7 @@ public class QuerySolver {
         	if (query.checking()){
                 return tree;
             }
-        	        	
+
         	hash = index.getPOS().get(t.getPredicateIndex());
         	array = hash.get(t.getObjectIndex());
         	

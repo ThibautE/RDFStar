@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.TreeSet;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -107,10 +106,6 @@ public class Query {
         check = true;
     }
     
-    private void unchecked() {
-    	check = false;
-    }
-	
 	public static void bind(ArrayList<Query> query, Dictionary dictionary) {
 		HashMap<String, Integer> mapR = dictionary.getDictionaryReversed();
         Integer obj, pred;

@@ -1,20 +1,13 @@
 package rdf;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.io.FilenameFilter;
-
-import org.openrdf.model.Statement;
 import org.openrdf.rio.*;
-import org.openrdf.rio.helpers.RDFHandlerBase;
-
 import rdf.RDFRawParser;
 import rdf.Query;
 import rdf.Dictionary;
@@ -82,7 +75,7 @@ public class Main {
 		
 		System.out.println("Jeu de données : " + fileD.getPath());
         System.out.println("Jeu de requêtes : " + fileQ.getPath());
-        System.out.println("Fichier de sortie : " + fileO.getCanonicalPath());
+        System.out.println("Fichier de sortie : " + fileO.getPath());
         System.out.println("----------------------------------------");
 
         ArrayList<Query> queries = new ArrayList<Query>(); 
@@ -148,10 +141,13 @@ public class Main {
         long reqend = System.currentTimeMillis();
         long totalRequete = reqend - reqstart;
         long total = end - start;
-        System.out.println("Durée total de l'éxecution : " + total + "ms");
-        System.out.println("Durée total de l'éxecution des requêtes (parse + exec) : " + totalRequete + "ms");
-        ExportCSV.exportTime(FILE_OUTPUT, durationSolve);
-
+        
+        //si "-verbose"
+        if(arguments.contains(VERBOSE)) {
+	        System.out.println("Durée total de l'éxecution : " + total + "ms");
+	        System.out.println("Durée total de l'éxecution des requêtes (parse + exec) : " + totalRequete + "ms");
+	        ExportCSV.exportTime(FILE_OUTPUT, durationSolve);
+        }
                         
         System.out.println("----------------------------------------");
         
@@ -171,8 +167,8 @@ public class Main {
         
         //si "-export_results"
             if(arguments.contains(EXPORT_RESULTS)) {
-        	System.out.println("Exportation du fichier de resultat...");
-        	ExportCSV.exportResults(FILE_OUTPUT, totalQueries, dictionary);
+	        	System.out.println("Exportation du fichier de resultat...");
+	        	ExportCSV.exportResults(FILE_OUTPUT, totalQueries, dictionary);
         	}
         
         if(arguments.contains(HELP)) {
